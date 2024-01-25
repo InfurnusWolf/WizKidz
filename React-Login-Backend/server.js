@@ -18,21 +18,21 @@ app.use(bodyParser.json());
 
 // POST route to create a new user
 app.post('/signup', (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, username, userClass } = req.body;
 
   console.log('Received data:', req.body); // Log the received data
 
-  // Check if user already exists
-  User.findOne({ email: email })
-    .then(user => {
-      if (user) {
-        // If user exists, send an error response
-        console.log('User already exists:', user);
-        res.status(400).send('User already exists');
+  // Check if a user with the provided email already exists
+  User.findOne({ email })
+    .then(existingUser => {
+      if (existingUser) {
+        // If a user with the provided email already exists, send an error message
+        console.error('User with this email already exists');
+        res.status(400).send('User with this email already exists');
       } else {
-        // If user does not exist, create a new user
-        const newUser = new User({ email, password });
-        newUser.save()
+        // If no user with the provided email exists, create a new user
+        const user = new User({ email, password, username, userClass });
+        user.save()
           .then(user => {
             console.log('User added successfully:', user); // Log the added user
             res.send('User added');
@@ -44,22 +44,22 @@ app.post('/signup', (req, res) => {
       }
     })
     .catch(err => {
-      console.error('Error checking if user exists', err);
-      res.status(500).send('Error checking if user exists');
+      console.error('Error checking for existing user', err);
+      res.status(500).send('Error checking for existing user');
     });
 });
 
 
 // POST route for login
 app.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
   // Find user with requested email and password
-  const user = await User.findOne({ email, password });
+  const user = await User.findOne({ username, password });
 
   if (user) {
     // User exists
-    res.send("exist");
+    res.send('exist');
   } else {
     // User does not exist
     res.send('notexist');
